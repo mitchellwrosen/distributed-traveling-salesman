@@ -10,13 +10,15 @@
 #include "common/location.h"
 #include "common/mpi/mpi.h"
 #include "common/mpi/utils.h"
+#include "common/path.h"
+#include "op_minpath.h"
 #include "utils.h"
 
 using namespace std;
 
 void printUsage(char* progname);
 void badProblemSize(int num_routes, int num_procs);
-void readLocs(char* filename, int num_locs, vector<Location>* locs);
+Location* readLocs(char* filename, int num_locs);
 
 Mpi* mpi;
 
@@ -25,31 +27,30 @@ int main(int argc, char** argv) {
     printUsage(argv[0]);
 
   mpi = new Mpi(&argc, &argv, 0, MPI_COMM_WORLD);
-  int numLocs = atoi(argv[2]);
-  int num_routes = numRoutes(numLocs);
+  int num_locs = atoi(argv[2]);
+  int num_routes = numRoutes(num_locs);
 
   if (num_routes % mpi->size != 0)
     badProblemSize(num_routes, mpi->size);
 
-  vector<Location> locs(numLocs);
-  readLocs(argv[1], numLocs, &locs);
+  Location* locs = readLocs(argv[1], num_locs);
 
   // Rearrange the vector to the appropriate permutation.
   int routes_per_node = num_routes / mpi->size;
-  permuteVector(locs, routes_per_node * mpi->rank);
+  permute(locs, num_locs, routes_per_node * mpi->rank);
 
-  pair<int, vector<Location>> best(numeric_limits<int>::max(), vector<Location>());
+  Path best_path = Path::longestPath();
   for (int i = 0; i < routes_per_node; ++i) {
-    int cost = pathCost(locs);
-    if (cost < best.first)
-      best = make_pair(cost, vector<Location>(locs));
-    next_permutation(locs.begin(), locs.end());
+    Path path = Path(locs, num_locs);
+    if (path.cost() < best_path.cost())
+      best_path = path;
+    next_permutation(locs, locs + num_locs);
   }
 
-  cout << "Shortest path: ";
-  for (Location loc : best.second)
-    cout << loc.id << " ";
-  cout << best.first << endl;
+  best_path.print();
+
+  mpi->finalize();
+  delete mpi;
 }
 
 void printUsage(char* progname) {
@@ -63,9 +64,10 @@ void badProblemSize(int num_routes, int num_procs) {
   mpiAbort(-1);
 }
 
-void readLocs(char* filename, int numLocs, vector<Location>* locs) {
+Location* readLocs(char* filename, int numLocs) {
+  Location* locs = new Location[numLocs];
   ifstream infile(filename);
   for (int i = 0; i < numLocs; ++i)
-    infile >> locs->at(i).id >> locs->at(i).x >> locs->at(i).y;
+    infile >> locs[i].id >> locs[i].x >> locs[i].y;
+  return locs;
 }
-

@@ -1,5 +1,9 @@
 #include "utils.h"
 
+static size_t* factEuclidianDivision(const int n, int i);
+static int* makeFactArray(const int n);
+static void adjustEuclidianDivisionPerm(size_t* perm, const int n);
+
 uint64_t fact(int n) {
   uint64_t ret = 1;
   for (int i = 1; i <= n; ++i)
@@ -11,42 +15,42 @@ uint64_t numRoutes(int numLocs) {
   return fact(numLocs) / numLocs / 2;
 }
 
-int pathCost(const vector<Location>& path) {
-  int cost = 0;
 
-  const auto end = path.end()-1;
-  for (auto iter = path.begin(); iter != end; ++iter)
-    cost += iter->to(*(iter+1));
-  cost += path.back().to(path.front());
-
-  return cost;
+size_t* ithPermutation(const int n, int i) {
+  size_t* perm = factEuclidianDivision(n, i);
+  adjustEuclidianDivisionPerm(perm, n);
+  return perm;
 }
 
-vector<size_t> ithPermutation(const int n, int i) {
-  int j, k = 0;
+size_t* factEuclidianDivision(const int n, int i) {
+  int* fact = makeFactArray(n);
+  size_t* perm = new size_t[n];
 
-  vector<int> fact(n);
-  vector<size_t> perm(n);
-
-  // compute factorial numbers
-  fact[k] = 1;
-  while (++k < n)
-    fact[k] = fact[k - 1] * k;
-
-  // compute factorial code
-  for (k = 0; k < n; ++k) {
-    perm[k] = i / fact[n - 1 - k];
-    i = i % fact[n - 1 - k];
+  for (int k = 0; k < n; ++k) {
+    perm[k] = i / fact[n-1-k];
+    i %= fact[n-1-k];
   }
 
-  // readjust values to obtain the permutation
-  // start from the end and check if preceding values are lower
-  for (k = n - 1; k > 0; --k) {
-    for (j = k - 1; j >= 0; --j) {
+  delete[] fact;
+  return perm;
+}
+
+int* makeFactArray(const int n) {
+  int k = 0;
+  int* fact = new int[n];
+  fact[k] = 1;
+  while (++k < n)
+    fact[k] = fact[k-1] * k;
+  return fact;
+}
+
+// readjust values to obtain the permutation
+// start from the end and check if preceding values are lower
+void adjustEuclidianDivisionPerm(size_t* perm, const int n) {
+  for (int k = n - 1; k > 0; --k) {
+    for (int j = k - 1; j >= 0; --j) {
       if (perm[j] <= perm[k])
         perm[k]++;
     }
   }
-
-  return perm;
 }
