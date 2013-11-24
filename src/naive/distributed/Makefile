@@ -7,7 +7,12 @@ OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 INC=-I.
 LIBS=-lmpi
 
-all: $(OBJS)
+all: naive-distributed
+
+debug: CC += -g -DDEBUG
+debug: naive-distributed
+
+naive-distributed: $(OBJS)
 	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o naive-distributed
 
 %.o: %.cpp

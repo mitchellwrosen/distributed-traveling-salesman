@@ -5,7 +5,6 @@
 #include <limits>
 #include <mpi.h>
 #include <utility>
-#include <vector>
 
 #include "common/location.h"
 #include "common/mpi/mpi.h"
@@ -27,6 +26,7 @@ int main(int argc, char** argv) {
     printUsage(argv[0]);
 
   mpi = new Mpi(&argc, &argv, 0, MPI_COMM_WORLD);
+
   int num_locs = atoi(argv[2]);
   int num_routes = numRoutes(num_locs);
 
@@ -39,18 +39,35 @@ int main(int argc, char** argv) {
   int routes_per_node = num_routes / mpi->size;
   permute(locs, num_locs, routes_per_node * mpi->rank);
 
-  Path best_path = Path::longestPath();
+  Path local_best_path = Path::longestPath();
   for (int i = 0; i < routes_per_node; ++i) {
     Path path = Path(locs, num_locs);
-    if (path.cost() < best_path.cost())
-      best_path = path;
+    if (path.cost() < local_best_path.cost())
+      local_best_path = path;
     next_permutation(locs, locs + num_locs);
   }
 
-  best_path.print();
+  local_best_path.print();
+
+  char* serialized_local_best_path = local_best_path.serialize();
+  int serialized_len = local_best_path.serializedLen();
+
+  // Reduce best path of them all onto root.
+  char* serialized_best_path;
+  if (mpi->isRoot())
+    serialized_best_path = new char[serialized_len];
+  mpi->reduce(serialized_local_best_path, serialized_best_path, serialized_len, MPI_CHAR, MPI_MINPATH);
+
+  delete[] serialized_local_best_path;
+
+  if (mpi->isRoot()) {
+    Path best_path = Path::deserialize(serialized_best_path);
+    cout << "Reduced, best path:" << endl;
+    best_path.print();
+  }
 
   mpi->finalize();
-  delete mpi;
+  //delete mpi;
 }
 
 void printUsage(char* progname) {

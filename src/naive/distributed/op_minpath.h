@@ -3,7 +3,7 @@
 
 #include <mpi.h>
 
-#define MPI_MINPATH op_minpath::getOp()
+#define MPI_MINPATH _op_minpath::getOp()
 
 /**
  * Class to wrap/create a minpath reduction operation. Can't be static, because

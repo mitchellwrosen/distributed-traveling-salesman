@@ -31,7 +31,7 @@ size_t* factEuclidianDivision(const int n, int i) {
     i %= fact[n-1-k];
   }
 
-  delete[] fact;
+  //delete[] fact;
   return perm;
 }
 

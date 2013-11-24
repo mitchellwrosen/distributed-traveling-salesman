@@ -18,3 +18,11 @@ bool Mpi::isRoot() const {
 void Mpi::finalize() {
   MPI_CHECK(MPI_Finalize());
 }
+
+void Mpi::reduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op) {
+  MPI_CHECK(MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm));
+}
+
+void Mpi::gather(void* sendbuf, int sendcnt, MPI_Datatype sendtype, void* recvbuf, int recvcnt, MPI_Datatype recvtype) {
+  MPI_CHECK(MPI_Gather(sendbuf, sendcnt, sendtype, recvbuf, recvcnt, recvtype, root, comm));
+}

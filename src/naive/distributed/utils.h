@@ -4,9 +4,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
-#include <vector>
-
-#include<iostream>
 
 #include "common/location.h"
 
@@ -37,7 +34,7 @@ void permute(T* elems, int len, int permutation) {
     }
   }
 
-  delete[] order;
+  //delete[] order;
 }
 
 template<class T>
