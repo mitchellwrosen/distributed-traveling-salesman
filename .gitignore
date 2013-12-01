@@ -1,3 +1,5 @@
 *.o
 naive-single
 naive-distributed
+held-karp-single
+held-karp-distributed

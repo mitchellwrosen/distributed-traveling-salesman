@@ -2,8 +2,14 @@
 #define TABLEAU_H_
 
 #include <cstdint>
+#include <vector>
+
+#include "common/location.h"
+#include "distance_matrix.h"
 
 #define MAX_LOCATIONS 20
+
+using std::vector;
 
 class Tableau {
  public:
@@ -44,19 +50,23 @@ class Tableau {
   //      0 1 0 0 1 1 0  // Right-shift away the 0th bit, because it's implied.
   //                     // Use these bits to index into array.
   //
-  explicit Tableau(int num_locs);
+  Tableau(const vector<Location>& locs);
+
+  static Tableau fromDistMatrixFile(const char* filename);
 
   ~Tableau();
 
-  uint32_t at(uint32_t bitset, uint32_t endloc);
-
-  // Fill in this empty tableau, given a distance matrix (upper-right).
-  void fill(int** dist, int num_locs);
+  void debugPrint();
 
  private:
-  int num_rows_;
-  int num_cols_;
+  Tableau(DistanceMatrix* dist);
 
+  void fill();
+
+  uint32_t num_rows_;
+  uint32_t num_cols_;
+
+  DistanceMatrix* dist_;
   uint32_t** data_;
 };
 
