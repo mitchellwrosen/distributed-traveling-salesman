@@ -29,8 +29,8 @@ namespace {
 Tableau::Tableau(const vector<Location>& locs) : Tableau(new DistanceMatrix(locs)) {
 }
 
-Tableau::Tableau(DistanceMatrix* dist) : dist_(dist) {
-  int num_locs = dist_->num_locs();
+Tableau::Tableau(DistanceMatrix* dist) {
+  int num_locs = dist->num_locs();
   num_rows_ = 1 << (num_locs-1);  // 2^(n-1) rows
   num_cols_ = num_locs - 1;       // n-1 cols
 
@@ -38,7 +38,7 @@ Tableau::Tableau(DistanceMatrix* dist) : dist_(dist) {
   for (uint32_t i = 0; i < num_rows_; ++i)
     data_[i] = (uint32_t*) calloc(num_cols_, sizeof(uint32_t));
 
-  fill();
+  fill(dist);
 }
 
 // static
@@ -50,11 +50,9 @@ Tableau::~Tableau() {
   for (uint32_t i = 0; i < num_rows_; ++i)
     free(data_[i]);
   free(data_);
-
-  delete dist_;
 }
 
-void Tableau::fill() {
+void Tableau::fill(DistanceMatrix* dist) {
   // Skip row 0 - corresponds to the set with only {0} (meaningless)
   for (uint32_t bitset = 1; bitset < num_rows_; ++bitset) {
     for (uint32_t endloc = 0; endloc < num_cols_; ++endloc) {
@@ -69,7 +67,7 @@ void Tableau::fill() {
       // simply the distance from 0 to the location denoted by endloc (the set
       // bit).
       if (__builtin_popcount(bitset) == 1) {
-        data_[bitset][endloc] = dist_->at(0, endloc+1);
+        data_[bitset][endloc] = dist->at(0, endloc+1);
       }
 
       // C(S,endloc) = min {
@@ -92,7 +90,7 @@ void Tableau::fill() {
         // Here, loc=0 corresponds to location 1, so trivially we satisfy loc != 0
         for (uint32_t loc = 0; loc < num_cols_; ++loc) {
           if (loc != endloc && (bitset & (1 << loc))) {
-            int loc_to_endloc = dist_->at(loc+1, endloc+1);            // dist(loc,endloc)
+            int loc_to_endloc = dist->at(loc+1, endloc+1);            // dist(loc,endloc)
             uint32_t origin_to_loc = data_[bitset_minus_endloc][loc];  // C(S-{endloc},loc)
             min_path = min(min_path, origin_to_loc + loc_to_endloc);
           }

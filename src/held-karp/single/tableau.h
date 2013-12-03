@@ -13,6 +13,8 @@ using std::vector;
 
 class Tableau {
  public:
+  // TODO Update this comment
+  //
   // Initialize the main tableau, where tableau[i][j] represents the minimum cost
   // from location 0 to location j, visiting every location in location set i
   // (represented as a bitset). Both location 0 and location j must of course
@@ -52,21 +54,24 @@ class Tableau {
   //
   Tableau(const vector<Location>& locs);
 
+  Tableau(DistanceMatrix* dist);
   static Tableau fromDistMatrixFile(const char* filename);
 
   ~Tableau();
 
   void debugPrint();
 
- private:
-  Tableau(DistanceMatrix* dist);
+  // Getters
+  uint32_t numRows() const { return num_rows_; }
+  uint32_t numCols() const { return num_cols_; }
+  uint32_t** data() const { return data_; }
 
-  void fill();
+ private:
+  void fill(DistanceMatrix* dist);
 
   uint32_t num_rows_;
   uint32_t num_cols_;
 
-  DistanceMatrix* dist_;
   uint32_t** data_;
 };
 

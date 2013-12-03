@@ -9,26 +9,37 @@
 #include "common/location.h"
 #include "tableau.h"
 
-using namespace std;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::min;
+using std::numeric_limits;
 
 void printUsage(char* progname);
-void readLocs(char* filename, int numLocs, vector<Location>* locs);
+vector<Location> readLocs(char* filename, int num_locs);
 
 int** makeDistTable(const vector<Location>& locs);
 uint32_t** initializeTableau(int num_locs);
 
 int main(int argc, char** argv) {
-  /**
   if (argc != 3)
     printUsage(argv[0]);
 
-  int numLocs = atoi(argv[2]);
-  vector<Location> locs(numLocs);
-  readLocs(argv[1], numLocs, &locs);
-  */
+  int num_locs = atoi(argv[2]);
+  vector<Location> locs = readLocs(argv[1], num_locs);
 
-  Tableau tableau = Tableau::fromDistMatrixFile(argv[1]);
-  tableau.debugPrint();
+  DistanceMatrix* dist = new DistanceMatrix(locs);
+
+  Tableau tableau(dist);
+  //tableau.debugPrint();
+
+  uint32_t min_cost = numeric_limits<int>::max();
+  int num_rows = tableau.numRows();
+  int num_cols = tableau.numCols();
+  for (int i = 0; i < num_cols; ++i)
+    min_cost = min(min_cost, tableau.data()[num_rows-1][i] + dist->at(0, i+1));
+  cout << "Min cost path: " << min_cost << endl;
 }
 
 void printUsage(char* progname) {
@@ -36,8 +47,10 @@ void printUsage(char* progname) {
   exit(-1);
 }
 
-void readLocs(char* filename, int numLocs, vector<Location>* locs) {
+vector<Location> readLocs(char* filename, int num_locs) {
+  vector<Location> locs(num_locs);
   ifstream infile(filename);
-  for (int i = 0; i < numLocs; ++i)
-    infile >> locs->at(i).id >> locs->at(i).x >> locs->at(i).y;
+  for (int i = 0; i < num_locs; ++i)
+    infile >> locs.at(i).id >> locs.at(i).x >> locs.at(i).y;
+  return locs;
 }
