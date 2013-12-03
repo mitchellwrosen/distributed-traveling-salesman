@@ -19,4 +19,4 @@ held-karp-distributed: $(OBJS)
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJS)
+	@rm -f $(OBJS) held-karp-distributed
