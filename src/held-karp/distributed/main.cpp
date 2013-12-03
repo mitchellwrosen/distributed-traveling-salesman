@@ -3,10 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <mpi.h>
 #include <utility>
 #include <vector>
 
 #include "common/location.h"
+#include "common/mpi/mpi.h"
 #include "tableau.h"
 
 using std::cerr;
@@ -22,9 +24,13 @@ vector<Location> readLocs(char* filename, int num_locs);
 int** makeDistTable(const vector<Location>& locs);
 uint32_t** initializeTableau(int num_locs);
 
+Mpi* mpi;
+
 int main(int argc, char** argv) {
   if (argc != 3)
     printUsage(argv[0]);
+
+  mpi = new Mpi(&argc, &argv, 0, MPI_COMM_WORLD);
 
   int num_locs = atoi(argv[2]);
   vector<Location> locs = readLocs(argv[1], num_locs);
