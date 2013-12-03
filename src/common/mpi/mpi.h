@@ -23,11 +23,19 @@ struct Mpi {
   void finalize();
 
   // Wrapper methods.
+  void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Request* request);
+  void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag);
+
+  void recv(void* buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Status* status);
+  void recv(void* buf, int count, MPI_Datatype datatype, int source, int tag);
+  void recvInt(void* buf, int source, int tag, MPI_Status* status);
+  void recvInt(void* buf, int source, int tag);
+
   void reduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op);
   void gather(void* sendbuf, int sendcnt, MPI_Datatype sendtype, void* recvbuf, int recvcnt, MPI_Datatype recvtype);
 
-  int size;
-  int rank;
+  const int size;
+  const int rank;
   int root;
   MPI_Comm comm;
 };

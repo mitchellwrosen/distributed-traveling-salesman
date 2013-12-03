@@ -22,7 +22,7 @@ void printUsage(char* progname);
 vector<Location> readLocs(char* filename, int num_locs);
 
 int** makeDistTable(const vector<Location>& locs);
-uint32_t** initializeTableau(int num_locs);
+uint64_t** initializeTableau(int num_locs);
 
 Mpi* mpi;
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   Tableau tableau(dist);
   //tableau.debugPrint();
 
-  uint32_t min_cost = numeric_limits<int>::max();
+  uint64_t min_cost = numeric_limits<int>::max();
   int num_rows = tableau.numRows();
   int num_cols = tableau.numCols();
   for (int i = 0; i < num_cols; ++i)

@@ -7,8 +7,8 @@
 #include "common/location.h"
 #include "distance_matrix.h"
 
-#define MAX_LOCATIONS 20          // Must be <= 31
-#define UNINITIALIZED ((uint32_t) 0xFFFFFFFF)
+#define MAX_LOCATIONS 30  // Must be < 64
+#define UNINITIALIZED ((uint64_t) 0xFFFFFFFF)
 
 using std::vector;
 
@@ -69,25 +69,29 @@ class Tableau {
   void debugPrint();
 
   // Getters
-  uint32_t numRows() const { return num_rows_; }
-  uint32_t numCols() const { return num_cols_; }
-  uint32_t** data() const { return data_; }
+  uint64_t numRows() const { return num_rows_; }
+  uint64_t numCols() const { return num_cols_; }
+  uint64_t** data() const { return data_; }
 
  private:
+  void initializeSendbuf(int num_locs);
+
   void fill(DistanceMatrix* dist);
   void fillTwoElementSets(DistanceMatrix* dist);
 
   // Read data from elsewhere in the tableau, which will possibly recv it from
   // another node.
-  uint32_t readData(uint32_t bitset, uint32_t loc);
+  uint64_t readData(uint64_t bitset, uint64_t loc);
 
   // Write to the tableau, which will send it to all other nodes.
-  void writeData(uint32_t bitset, uint32_t loc, uint32_t cost);
+  void writeData(uint64_t bitset, uint64_t loc, uint64_t cost);
 
-  uint32_t num_rows_;
-  uint32_t num_cols_;
+  uint64_t* sendbuf_;
 
-  uint32_t** data_;
+  uint64_t num_rows_;
+  uint64_t num_cols_;
+
+  uint64_t** data_;
 };
 
 #endif  // TABLEAU_H_
