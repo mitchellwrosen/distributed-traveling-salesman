@@ -4,6 +4,12 @@
 
 #include "common/mpi/utils.h"
 
+#ifdef DEBUG
+#include <iostream>
+using std::cerr;
+using std::endl;
+#endif
+
 Mpi::Mpi(int* argc, char*** argv, int root, MPI_Comm comm) 
     : size(0)  // Will be overridden
     , rank(0)  // Will be overridden
@@ -30,7 +36,22 @@ void Mpi::ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag,
 
 void Mpi::ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag) {
   MPI_Request req;
-  MPI_CHECK(MPI_Ibsend(buf, count, datatype, dest, tag, comm, &req));
+  ibsend(buf, count, datatype, dest, tag, &req);
+  MPI_Request_free(&req);
+}
+
+void Mpi::ibsendInt(void* buf, int dest, int tag, MPI_Request* request) {
+  #ifdef DEBUG
+    cerr << "Node " << rank << ": MPI_Ibsend { payload=" << *((uint64_t*) buf)
+         << ", dest=" << dest << ", tag=" << tag << " }" << endl;
+  #endif
+
+  MPI_CHECK(MPI_Ibsend(buf, 1, MPI_INT, dest, tag, comm, request));
+}
+
+void Mpi::ibsendInt(void* buf, int dest, int tag) {
+  MPI_Request req;
+  ibsendInt(buf, dest, tag, &req);
   MPI_Request_free(&req);
 }
 
@@ -39,15 +60,25 @@ void Mpi::recv(void* buf, int count, MPI_Datatype datatype, int source, int tag,
 }
 
 void Mpi::recv(void* buf, int count, MPI_Datatype datatype, int source, int tag) {
-  MPI_CHECK(MPI_Recv(buf, count, datatype, source, tag, comm, MPI_STATUS_IGNORE));
+  recv(buf, count, datatype, source, tag, MPI_STATUS_IGNORE);
 }
 
 void Mpi::recvInt(void* buf, int source, int tag, MPI_Status* status) {
-  MPI_CHECK(MPI_Recv(buf, 1, MPI_INT, source, tag, comm, status));
+  recv(buf, 1, MPI_INT, source, tag, status);
 }
 
 void Mpi::recvInt(void* buf, int source, int tag) {
-  MPI_CHECK(MPI_Recv(buf, 1, MPI_INT, source, tag, comm, MPI_STATUS_IGNORE));
+  #ifdef DEBUG
+    cerr << "Node " << rank << ": PRE MPI_Recv { source=" << source << ", tag=" 
+         << tag << " }" << endl;
+  #endif
+
+  recvInt(buf, source, tag, MPI_STATUS_IGNORE);
+
+  #ifdef DEBUG
+    cerr << "Node " << rank << ": POST MPI_Recv { payload=" 
+         << *((uint64_t*) buf) << " }" << endl;
+  #endif
 }
 
 void Mpi::reduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op) {

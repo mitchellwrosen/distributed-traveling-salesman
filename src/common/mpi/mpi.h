@@ -25,6 +25,8 @@ struct Mpi {
   // Wrapper methods.
   void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Request* request);
   void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag);
+  void ibsendInt(void* buf, int dest, int tag, MPI_Request* request);
+  void ibsendInt(void* buf, int dest, int tag);
 
   void recv(void* buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Status* status);
   void recv(void* buf, int count, MPI_Datatype datatype, int source, int tag);

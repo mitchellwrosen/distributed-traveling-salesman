@@ -121,7 +121,7 @@ void Tableau::writeData(uint64_t bitset, uint64_t loc, uint64_t cost) {
 
   for (int i = 0; i < mpi->size; ++i) {
     if (i != mpi->rank)
-      mpi->ibsend(&cost, 1, MPI_INT, i, bitset); // payload=cost, tag=bitset
+      mpi->ibsendInt(&cost, i, bitset); // payload=cost, tag=bitset
   }
 }
 
