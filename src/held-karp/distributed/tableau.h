@@ -7,7 +7,8 @@
 #include "common/location.h"
 #include "distance_matrix.h"
 
-#define MAX_LOCATIONS 20
+#define MAX_LOCATIONS 20          // Must be <= 31
+#define UNINITIALIZED ((uint32_t) 0xFFFFFFFF)
 
 using std::vector;
 
@@ -24,24 +25,30 @@ class Tableau {
   // a nonsensical cell. The empty cells are to be filled in using dynamic
   // programming.
   //
-  //
-  //             +---+---+---+
-  //             | 1 | 2 | 3 |
-  // +-----------+---+---+---+
-  // | {0,1}     |   | X | X |
-  // +-----------+---+---+---+
-  // | {0,2}     | X |   | X |
-  // +-----------+---+---+---+
-  // | {0,3}     | X | X |   |
-  // +-----------+---+---+---+
-  // | {0,1,2}   |   |   | X |
-  // +-----------+---+---+---+
-  // | {0,1,3}   |   | X |   |
-  // +-----------+---+---+---+
-  // | {0,2,3}   | X |   |   |
-  // +-----------+---+---+---+
-  // | {0,1,2,3} |   |   |   |
-  // +-----------+---+---+---+
+  //                 Location 1
+  //                /
+  //               /   Location 2
+  //              /   /
+  //             |   |
+  //           +---+---+---+
+  //           | 0 | 1 | 2 |
+  // +---------+---+---+---+
+  // | {}      | X | X | X |  // Location 0
+  // +---------+---+---+---+
+  // | {1}     |   | X | X |  // Locations 0 and 1
+  // +---------+---+---+---+
+  // | {2}     | X |   | X |  // Locations 0 and 2
+  // +---------+---+---+---+
+  // | {3}     | X | X |   |  // and so on...
+  // +---------+---+---+---+
+  // | {1,2}   |   |   | X |
+  // +---------+---+---+---+
+  // | {1,3}   |   | X |   |
+  // +---------+---+---+---+
+  // | {2,3}   | X |   |   |
+  // +---------+---+---+---+
+  // | {1,2,3} |   |   |   |
+  // +---------+---+---+---+
   //
   // Because every set contains location 0, we need only allocate 2^(n-1) rows
   // (row 0, corresponding to the empty set, will simply never be used). Thus,
@@ -68,6 +75,14 @@ class Tableau {
 
  private:
   void fill(DistanceMatrix* dist);
+  void fillTwoElementSets(DistanceMatrix* dist);
+
+  // Read data from elsewhere in the tableau, which will possibly recv it from
+  // another node.
+  uint32_t readData(uint32_t bitset, uint32_t loc);
+
+  // Write to the tableau, which will send it to all other nodes.
+  void writeData(uint32_t bitset, uint32_t loc, uint32_t cost);
 
   uint32_t num_rows_;
   uint32_t num_cols_;
