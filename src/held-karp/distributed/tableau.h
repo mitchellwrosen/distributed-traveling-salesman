@@ -1,8 +1,9 @@
 #ifndef TABLEAU_H_
 #define TABLEAU_H_
 
-#include <cstdint>
 #include <vector>
+
+#include <stdint.h>
 
 #include "common/location.h"
 #include "distance_matrix.h"
@@ -59,10 +60,7 @@ class Tableau {
   //      0 1 0 0 1 1 0  // Right-shift away the 0th bit, because it's implied.
   //                     // Use these bits to index into array.
   //
-  Tableau(const vector<Location>& locs);
-
   Tableau(DistanceMatrix* dist);
-  static Tableau fromDistMatrixFile(const char* filename);
 
   ~Tableau();
 

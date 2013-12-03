@@ -9,6 +9,8 @@
 #include <mpi.h>
 #include <vector>
 
+#include <stdint.h>
+
 #include "common/location.h"
 #include "common/mpi/mpi.h"
 #include "common/mpi/utils.h"
@@ -31,9 +33,6 @@ namespace {
     }
     cout << "}" << "\t";
   }
-}
-
-Tableau::Tableau(const vector<Location>& locs) : Tableau(new DistanceMatrix(locs)) {
 }
 
 Tableau::Tableau(DistanceMatrix* dist) {
@@ -64,11 +63,6 @@ void Tableau::initializeSendbuf(int num_locs) {
   uint64_t bufsize = num_msgs * (sizeof(uint64_t) + MPI_BSEND_OVERHEAD);
   sendbuf_ = (uint64_t*) malloc(bufsize);
   MPI_Buffer_attach(sendbuf_, bufsize);
-}
-
-// static
-Tableau Tableau::fromDistMatrixFile(const char* filename) {
-  return Tableau(new DistanceMatrix(filename));
 }
 
 Tableau::~Tableau() {

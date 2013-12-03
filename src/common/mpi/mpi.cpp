@@ -6,15 +6,16 @@
 
 #ifdef DEBUG
 #include <iostream>
+#include <stdint.h>
 using std::cerr;
 using std::endl;
 #endif
 
-Mpi::Mpi(int* argc, char*** argv, int root, MPI_Comm comm) 
+Mpi::Mpi(int* argc, char*** argv, int root, MPI_Comm comm)
     : size(0)  // Will be overridden
     , rank(0)  // Will be overridden
     , root(root)
-    , comm(comm) 
+    , comm(comm)
     {
   MPI_CHECK(MPI_Init(argc, argv));
 
@@ -69,14 +70,14 @@ void Mpi::recvInt(void* buf, int source, int tag, MPI_Status* status) {
 
 void Mpi::recvInt(void* buf, int source, int tag) {
   #ifdef DEBUG
-    cerr << "Node " << rank << ": PRE MPI_Recv { source=" << source << ", tag=" 
+    cerr << "Node " << rank << ": PRE MPI_Recv { source=" << source << ", tag="
          << tag << " }" << endl;
   #endif
 
   recvInt(buf, source, tag, MPI_STATUS_IGNORE);
 
   #ifdef DEBUG
-    cerr << "Node " << rank << ": POST MPI_Recv { payload=" 
+    cerr << "Node " << rank << ": POST MPI_Recv { payload="
          << *((uint64_t*) buf) << " }" << endl;
   #endif
 }

@@ -55,7 +55,7 @@ void Path::destructPath() {
 
 // static
 Path Path::longestPath() {
-  return Path(nullptr, 0, numeric_limits<int>::max());
+  return Path(NULL, 0, numeric_limits<int>::max());
 }
 
 // static
@@ -91,7 +91,7 @@ int Path::calculateCost(Location* locs, int len) {
 }
 
 void Path::print() const {
-  for (int i = 0; i < len_; ++i) 
+  for (int i = 0; i < len_; ++i)
     cout << locs_[i].id << " ";
   cout << "(" << cost_ << ")" << endl;
 }

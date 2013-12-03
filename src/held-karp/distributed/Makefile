@@ -1,5 +1,5 @@
 CC=mpic++
-CFLAGS=-Wall -mpopcnt -std=c++11
+CFLAGS=-Wall
 LDFLAGS=-Wall
 
 SRCS=$(wildcard *.cpp **/*.cpp **/**/*.cpp)

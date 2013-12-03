@@ -1,11 +1,12 @@
 #include <algorithm>
-#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <mpi.h>
 #include <utility>
 #include <vector>
+
+#include <stdint.h>
 
 #include "common/location.h"
 #include "common/mpi/mpi.h"
