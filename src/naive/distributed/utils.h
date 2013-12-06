@@ -19,11 +19,11 @@ uint64_t numRoutes(int numLocs);
  *
  * Taken from http://stackoverflow.com/questions/7918806/finding-n-th-permutation-without-computing-others
  */
-size_t* ithPermutation(const int n, int i);
+uint64_t* ithPermutation(const int n, uint64_t i);
 
 template<class T>
-void permute(T* elems, int len, int permutation) {
-  size_t* order = ithPermutation(len, permutation);
+void permute(T* elems, int len, uint64_t permutation) {
+  uint64_t* order = ithPermutation(len, permutation);
 
   for (int s = 1, d; s < len; ++s) {
     for (d = order[s]; d < s; d = order[d])

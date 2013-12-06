@@ -36,18 +36,27 @@ int main(int argc, char** argv) {
   Location* locs = readLocs(argv[1], num_locs);
 
   // Rearrange the vector to the appropriate permutation.
-  int routes_per_node = num_routes / mpi->size;
+  uint64_t routes_per_node = num_routes / mpi->size;
   permute(locs, num_locs, routes_per_node * mpi->rank);
+  #ifdef DEBUG
+  {
+     Path initial_path = Path(locs, num_locs);
+     cout << "Initial path on node " << mpi->rank << ": ";
+     initial_path.print();
+  }
+  #endif
 
   Path local_best_path = Path::longestPath();
-  for (int i = 0; i < routes_per_node; ++i) {
+  for (uint64_t i = 0; i < routes_per_node; ++i) {
     Path path = Path(locs, num_locs);
     if (path.cost() < local_best_path.cost())
       local_best_path = path;
     next_permutation(locs, locs + num_locs);
   }
 
+  #ifdef DEBUG
   local_best_path.print();
+  #endif
 
   char* serialized_local_best_path = local_best_path.serialize();
   int serialized_len = local_best_path.serializedLen();
@@ -62,12 +71,12 @@ int main(int argc, char** argv) {
 
   if (mpi->isRoot()) {
     Path best_path = Path::deserialize(serialized_best_path);
-    cout << "Reduced, best path:" << endl;
+    cout << "Best path: ";
     best_path.print();
   }
 
   mpi->finalize();
-  //delete mpi;
+  delete mpi;
 }
 
 void printUsage(char* progname) {

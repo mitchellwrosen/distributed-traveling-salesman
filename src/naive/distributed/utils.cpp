@@ -1,8 +1,10 @@
 #include "utils.h"
 
-static size_t* factEuclidianDivision(const int n, int i);
-static int* makeFactArray(const int n);
-static void adjustEuclidianDivisionPerm(size_t* perm, const int n);
+#include <stdint.h>
+
+static uint64_t* factEuclidianDivision(const int n, uint64_t i);
+static uint64_t* makeFactArray(const int n);
+static void adjustEuclidianDivisionPerm(uint64_t* perm, const int n);
 
 uint64_t fact(int n) {
   uint64_t ret = 1;
@@ -16,15 +18,15 @@ uint64_t numRoutes(int numLocs) {
 }
 
 
-size_t* ithPermutation(const int n, int i) {
-  size_t* perm = factEuclidianDivision(n, i);
+uint64_t* ithPermutation(const int n, uint64_t i) {
+  uint64_t* perm = factEuclidianDivision(n, i);
   adjustEuclidianDivisionPerm(perm, n);
   return perm;
 }
 
-size_t* factEuclidianDivision(const int n, int i) {
-  int* fact = makeFactArray(n);
-  size_t* perm = new size_t[n];
+uint64_t* factEuclidianDivision(const int n, uint64_t i) {
+  uint64_t* fact = makeFactArray(n);
+  uint64_t* perm = new uint64_t[n];
 
   for (int k = 0; k < n; ++k) {
     perm[k] = i / fact[n-1-k];
@@ -35,9 +37,9 @@ size_t* factEuclidianDivision(const int n, int i) {
   return perm;
 }
 
-int* makeFactArray(const int n) {
+uint64_t* makeFactArray(const int n) {
   int k = 0;
-  int* fact = new int[n];
+  uint64_t* fact = new uint64_t[n];
   fact[k] = 1;
   while (++k < n)
     fact[k] = fact[k-1] * k;
@@ -46,7 +48,7 @@ int* makeFactArray(const int n) {
 
 // readjust values to obtain the permutation
 // start from the end and check if preceding values are lower
-void adjustEuclidianDivisionPerm(size_t* perm, const int n) {
+void adjustEuclidianDivisionPerm(uint64_t* perm, const int n) {
   for (int k = n - 1; k > 0; --k) {
     for (int j = k - 1; j >= 0; --j) {
       if (perm[j] <= perm[k])
