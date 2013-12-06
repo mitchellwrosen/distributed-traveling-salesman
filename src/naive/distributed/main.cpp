@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
   // Rearrange the vector to the appropriate permutation.
   uint64_t routes_per_node = num_routes / mpi->size;
-  permute(locs, num_locs, routes_per_node * mpi->rank);
+  locs = permute(locs, num_locs, routes_per_node * mpi->rank);
   #ifdef DEBUG
   {
      Path initial_path = Path(locs, num_locs);
