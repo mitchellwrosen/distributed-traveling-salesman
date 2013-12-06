@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   vector<Location> locs(numLocs);
   readLocs(argv[1], numLocs, &locs);
 
-  pair<int, vector<Location>> best(numeric_limits<int>::max(), vector<Location>());
+  pair<int, vector<Location> > best(numeric_limits<int>::max(), vector<Location>());
   int num_routes = numRoutes(numLocs);
   for (int i = 0; i < num_routes; ++i) {
     int cost = pathCost(locs);
@@ -32,8 +32,9 @@ int main(int argc, char** argv) {
   }
 
   cout << "Shortest path: ";
-  for (Location loc : best.second)
-    cout << loc.id << " ";
+  vector<Location>::const_iterator end = best.second.end();
+  for (vector<Location>::const_iterator iter = best.second.begin(); iter != end; ++iter)
+    cout << iter->id << " ";
   cout << best.first << endl;
 }
 

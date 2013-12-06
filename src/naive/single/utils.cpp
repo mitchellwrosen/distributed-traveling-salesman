@@ -14,8 +14,8 @@ uint64_t numRoutes(int numLocs) {
 int pathCost(const vector<Location>& path) {
   int cost = 0;
 
-  const auto end = path.end()-1;
-  for (auto iter = path.begin(); iter != end; ++iter)
+  vector<Location>::const_iterator end = path.end()-1;
+  for (vector<Location>::const_iterator iter = path.begin(); iter != end; ++iter)
     cost += iter->to(*(iter+1));
   cost += path.back().to(path.front());
 

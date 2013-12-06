@@ -1,8 +1,9 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#include <cstdint>
 #include <vector>
+
+#include <stdint.h>
 
 #include "common/location.h"
 
