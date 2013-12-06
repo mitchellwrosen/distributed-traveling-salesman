@@ -1,9 +1,10 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#include <cstdint>
 #include <cstdlib>
 #include <iterator>
+
+#include <stdint.h>
 
 #include "common/location.h"
 

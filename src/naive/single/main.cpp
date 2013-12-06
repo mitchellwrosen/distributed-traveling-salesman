@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <stdint.h>
+
 #include "common/location.h"
 #include "utils.h"
 
@@ -23,8 +25,8 @@ int main(int argc, char** argv) {
   readLocs(argv[1], numLocs, &locs);
 
   pair<int, vector<Location> > best(numeric_limits<int>::max(), vector<Location>());
-  int num_routes = numRoutes(numLocs);
-  for (int i = 0; i < num_routes; ++i) {
+  uint64_t num_routes = numRoutes(numLocs);
+  for (uint64_t i = 0; i < num_routes; ++i) {
     int cost = pathCost(locs);
     if (cost < best.first)
       best = make_pair(cost, vector<Location>(locs));

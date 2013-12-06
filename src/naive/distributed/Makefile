@@ -1,5 +1,5 @@
 CC=mpic++
-CFLAGS=-Wall -std=c++11
+CFLAGS=-Wall
 LDFLAGS=-Wall
 
 SRCS=$(wildcard *.cpp **/*.cpp **/**/*.cpp)
@@ -7,16 +7,21 @@ OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 INC=-I.
 LIBS=-lmpi
 
-all: naive-distributed
+EXE=naive-distributed
+
+all: $(EXE)
 
 debug: CC += -g -DDEBUG
-debug: naive-distributed
+debug: $(EXE)
 
-naive-distributed: $(OBJS)
-	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o naive-distributed
+optimized: CC += -O3
+optimized: $(EXE)
+
+$(EXE): $(OBJS)
+	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o $(EXE)
 
 %.o: %.cpp
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJS)
+	@rm -f $(OBJS) $(EXE)

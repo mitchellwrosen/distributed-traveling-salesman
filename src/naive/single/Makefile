@@ -13,6 +13,9 @@ all: $(EXE)
 debug: CC += -g -DDEBUG
 debug: $(EXE)
 
+optimized: CC += -O3
+optimized: $(EXE)
+
 $(EXE): $(OBJS)
 	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o $(EXE)
 
