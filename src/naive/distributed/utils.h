@@ -21,21 +21,23 @@ uint64_t numRoutes(int numLocs);
  */
 uint64_t* ithPermutation(const int n, uint64_t i);
 
+/**
+ * Permute elems to the specified permutation. Returns a new permuted array and
+ * frees the original, so this should be called as:
+ *
+ *    foo = permute(foo, 5, 10);
+ */
 template<class T>
-void permute(T* elems, int len, uint64_t permutation) {
+T* permute(T* elems, int len, uint64_t permutation) {
   uint64_t* order = ithPermutation(len, permutation);
 
-  for (int s = 1, d; s < len; ++s) {
-    for (d = order[s]; d < s; d = order[d])
-      ;
+  T* permuted = new T[len];
+  for (int i = 0; i < len; ++i)
+    permuted[i] = elems[order[i]];
 
-    if (d == s) {
-      while (d = order[d], d != s)
-        swap(elems, s, d);
-    }
-  }
-
-  //delete[] order;
+  delete[] order;
+  delete[] elems;
+  return permuted;
 }
 
 template<class T>
