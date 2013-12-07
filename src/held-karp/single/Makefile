@@ -1,5 +1,5 @@
 CC=mpic++
-CFLAGS=-Wall -mpopcnt -std=c++11
+CFLAGS=-Wall -mpopcnt
 LDFLAGS=-Wall
 
 SRCS=$(wildcard *.cpp **/*.cpp **/**/*.cpp)
@@ -7,13 +7,18 @@ OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 INC=-I.
 LIBS=-lmpi
 
-all: held-karp-single
+EXE=held-karp-single
+
+all: $(EXE)
 
 debug: CC += -g -DDEBUG
-debug: held-karp-single
+debug: $(EXE)
 
-held-karp-single: $(OBJS)
-	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o held-karp-single
+optimized: CC += -O3
+optimized: $(EXE)
+
+$(EXE): $(OBJS)
+	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o $(EXE)
 
 %.o: %.cpp
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@

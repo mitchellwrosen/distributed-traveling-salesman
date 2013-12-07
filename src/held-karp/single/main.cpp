@@ -1,10 +1,11 @@
 #include <algorithm>
-#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <utility>
 #include <vector>
+
+#include <stdint.h>
 
 #include "common/location.h"
 #include "tableau.h"
@@ -20,7 +21,7 @@ void printUsage(char* progname);
 vector<Location> readLocs(char* filename, int num_locs);
 
 int** makeDistTable(const vector<Location>& locs);
-uint32_t** initializeTableau(int num_locs);
+uint64_t** initializeTableau(int num_locs);
 
 int main(int argc, char** argv) {
   if (argc != 3)
@@ -32,9 +33,12 @@ int main(int argc, char** argv) {
   DistanceMatrix* dist = new DistanceMatrix(locs);
 
   Tableau tableau(dist);
-  //tableau.debugPrint();
 
-  uint32_t min_cost = numeric_limits<int>::max();
+  #ifdef DEBUG
+  tableau.debugPrint();
+  #endif
+
+  uint64_t min_cost = numeric_limits<int>::max();
   int num_rows = tableau.numRows();
   int num_cols = tableau.numCols();
   for (int i = 0; i < num_cols; ++i)

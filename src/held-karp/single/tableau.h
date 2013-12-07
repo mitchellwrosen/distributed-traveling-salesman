@@ -1,13 +1,14 @@
 #ifndef TABLEAU_H_
 #define TABLEAU_H_
 
-#include <cstdint>
 #include <vector>
+
+#include <stdint.h>
 
 #include "common/location.h"
 #include "distance_matrix.h"
 
-#define MAX_LOCATIONS 20
+#define MAX_LOCATIONS 30  // Must be < 64
 
 using std::vector;
 
@@ -52,27 +53,24 @@ class Tableau {
   //      0 1 0 0 1 1 0  // Right-shift away the 0th bit, because it's implied.
   //                     // Use these bits to index into array.
   //
-  Tableau(const vector<Location>& locs);
-
   Tableau(DistanceMatrix* dist);
-  static Tableau fromDistMatrixFile(const char* filename);
 
   ~Tableau();
 
   void debugPrint();
 
   // Getters
-  uint32_t numRows() const { return num_rows_; }
-  uint32_t numCols() const { return num_cols_; }
-  uint32_t** data() const { return data_; }
+  uint64_t numRows() const { return num_rows_; }
+  uint64_t numCols() const { return num_cols_; }
+  uint64_t** data() const { return data_; }
 
  private:
   void fill(DistanceMatrix* dist);
 
-  uint32_t num_rows_;
-  uint32_t num_cols_;
+  uint64_t num_rows_;
+  uint64_t num_cols_;
 
-  uint32_t** data_;
+  uint64_t** data_;
 };
 
 #endif  // TABLEAU_H_
