@@ -8,7 +8,7 @@ uint64_t fact(int n) {
 }
 
 uint64_t numRoutes(int numLocs) {
-  return fact(numLocs) / numLocs / 2;
+  return fact(numLocs) / numLocs;
 }
 
 int pathCost(const vector<Location>& path) {

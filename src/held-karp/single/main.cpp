@@ -33,17 +33,23 @@ int main(int argc, char** argv) {
   DistanceMatrix* dist = new DistanceMatrix(locs);
 
   Tableau tableau(dist);
-
-  #ifdef DEBUG
   tableau.debugPrint();
-  #endif
 
   uint64_t min_cost = numeric_limits<int>::max();
-  int num_rows = tableau.numRows();
+  int last_row = tableau.numRows()-1;
   int num_cols = tableau.numCols();
-  for (int i = 0; i < num_cols; ++i)
-    min_cost = min(min_cost, tableau.data()[num_rows-1][i] + dist->at(0, i+1));
-  cout << "Min cost path: " << min_cost << endl;
+
+  int endloc = -1;
+  for (int i = 0; i < num_cols; ++i) {
+    uint64_t cost = tableau.data()[last_row][i] + dist->at(0, i+1);
+    if (cost < min_cost) {
+      min_cost = cost;
+      endloc = i;
+    }
+  }
+  cout << "Min cost path: " << min_cost << " ";
+  tableau.debugPrintPath(last_row, endloc);
+  cout << endl;
 }
 
 void printUsage(char* progname) {
