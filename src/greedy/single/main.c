@@ -1,104 +1,108 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 struct Point{
    int index;
+   double distance;
    double x;
    double y;
+   struct Point *next;
 };
 
 typedef struct Point POINT;
 
 float calcDistance (POINT * p1, POINT * p2);
-void readData(POINT **points, FILE * fIndex);
-void displayResults(int * path, int numPoints);
-int * greedy (POINT ** points, int numPoints);
-int findClosest (POINT * origin, POINT ** others);
+POINT * readData(FILE * fIndex);
+void displayResults(POINT * path);
+POINT * greedy (POINT * points);
+POINT * findClosest (POINT * origin, POINT * others);
 
 int main(int argc, char** argv) {
    FILE * pFile;
-   POINT **points;
-   int *path;
+   POINT *points;
    char *fileName;
-   int numPoints;
 
    /* Read in values */
    fileName = argv[1];
-   numPoints = strtol(argv[2], NULL, 10);
-   path = malloc(sizeof(int) * numPoints);
-   points = malloc(sizeof(POINT *) * numPoints);
-
    pFile = fopen(fileName, "r");
-   readData(points, pFile);
-   displayResults(greedy(points, numPoints), numPoints);
+   points = readData(pFile);
+   displayResults(greedy(points));
 
 }
 
-void displayResults(int * path, int numPoints) {
+void displayResults(POINT * path) {
    printf("Order of vertices for path: ");
-   for(int i = 0; i < numPoints; i++) {
-      printf("%d ", path[i]);
+   while(path) {
+      printf("%d ", path->index);
+      path = path->next;
    }
+   printf("\n");
 }
 
 float calcDistance (POINT * p1, POINT * p2) {
    return sqrt(pow((p2->x - p1->x),2) + pow((p2->y - p1->y),2));
 }
 
-int findClosest (POINT * origin, POINT ** others) {
-   int shortestDist = calcDistance(origin, *others);
-   int shortestIndex = 0;
-   int curIndex = 2;
-   float newDist;
-   others++;
+POINT * findClosest (POINT * origin, POINT * others) {
+   float shortestDist;
+   float curDist;
+   POINT * closest;
+   int curIndex = 1;
 
-   while(others++) {
-      newDist = calcDistance(origin, *others);
+   shortestDist = calcDistance(origin, others);
+   closest = others;
+   others = others->next;
 
-      if(newDist < shortestDist) {
-         shortestDist = newDist;
-         shortestIndex = curIndex;
+   while(others) {
+      curDist = calcDistance(origin, others);
+      if(curDist < shortestDist || !shortestDist) {
+         shortestDist = curDist;
+         closest = others;
       }
-      curIndex++;
+      others = others->next;
    }
-
-   return shortestIndex;
+   closest->distance = shortestDist;
+   return closest;
 }
 
-int existsIn (int * nums, int toFind) {
-   while(*nums++) {
-      if(*nums == toFind) {
-         return 1;
-      }
+POINT * removePoint(POINT * points, POINT * toRemove) {
+   if(points == NULL) {
+      return NULL;
    }
-   return 0;
+
+   if(points == toRemove) {
+      return points->next;
+   }
+
+   points->next = removePoint(points->next, toRemove);
+   return points;
 }
 
-int * greedy (POINT ** points, int numPoints) {
-   int *path = malloc(sizeof(int) * numPoints);
-   POINT ** neighbors = calloc(sizeof(POINT *), numPoints);
-   path[0] = 0;
-   int curVertex = 0;
-   int neighborIndex = 0;
-   /* Initialize unvisited points */
-   int * unvisited = malloc(sizeof(int) * numPoints);
-   for(int i=1; i < numPoints; i++) {
-      unvisited[i] =  i;
+POINT * greedy (POINT * points) {
+   POINT * path = NULL;
+   POINT * pathHd = NULL;
+   POINT * closestPoint;
+
+   /* Start at first point */
+   path = points;
+   points = points->next;
+   pathHd = path;
+
+   while(points) {
+      closestPoint = findClosest(path, points);
+      path->next = closestPoint;
+      path = path->next;
+      points = removePoint(points, closestPoint);
+      path->next = NULL;
    }
 
-   /* For every vertex in "points", not in "path", calculate
-   find the minimum distance from curVertex to that vertex */
-   for(int curVert = 0; curVert < numPoints; curVert++) {
-      if (!existsIn(path, curVert)) {
-         neighbors[neighborIndex++] = points[curVert];
-      }
-   }
-
-   return path;
+   return pathHd;
 }
 
-void readData(POINT ** points, FILE * fIndex) {
+POINT * readData(FILE * fIndex) {
+   POINT * points = NULL;
    int pointIndex = 0;
    double pointX = 0.0;
    double pointY = 0.0;
@@ -107,7 +111,16 @@ void readData(POINT ** points, FILE * fIndex) {
       POINT * aPoint = malloc(sizeof(POINT));
       aPoint->x = pointX;
       aPoint->y = pointY;
+      aPoint->distance = 0;
       aPoint->index = pointIndex;
-      points[pointIndex - 1] = aPoint;
+
+      if(!points) {
+         aPoint->next = NULL;
+         points = aPoint;
+      } else {
+         aPoint->next = points;
+         points = aPoint;
+      }
    }
+   return points;
 }
