@@ -58,6 +58,7 @@ class Tableau {
   ~Tableau();
 
   void debugPrint();
+  void debugPrintPath(uint64_t row, uint64_t col);
 
   // Getters
   uint64_t numRows() const { return num_rows_; }
@@ -66,8 +67,6 @@ class Tableau {
 
  private:
   void fill(DistanceMatrix* dist);
-
-  void debugPrintPath(uint64_t row, uint64_t col);
 
   uint64_t num_rows_;
   uint64_t num_cols_;

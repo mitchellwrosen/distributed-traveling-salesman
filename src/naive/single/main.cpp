@@ -28,6 +28,14 @@ int main(int argc, char** argv) {
   uint64_t num_routes = numRoutes(numLocs);
   for (uint64_t i = 0; i < num_routes; ++i) {
     int cost = pathCost(locs);
+
+    #ifdef DEBUG
+    cout << "[";
+    for (int i = 0; i < numLocs; ++i)
+      cout << locs[i].id << ",";
+    cout << "] (" << cost << ")" << endl;
+    #endif
+
     if (cost < best.first)
       best = make_pair(cost, vector<Location>(locs));
     next_permutation(locs.begin(), locs.end());
