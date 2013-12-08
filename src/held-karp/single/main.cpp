@@ -33,10 +33,7 @@ int main(int argc, char** argv) {
   DistanceMatrix* dist = new DistanceMatrix(locs);
 
   Tableau tableau(dist);
-
-  #ifdef DEBUG
   tableau.debugPrint();
-  #endif
 
   uint64_t min_cost = numeric_limits<int>::max();
   int num_rows = tableau.numRows();

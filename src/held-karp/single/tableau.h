@@ -67,10 +67,17 @@ class Tableau {
  private:
   void fill(DistanceMatrix* dist);
 
+  void debugPrintPath(uint64_t row, uint64_t col);
+
   uint64_t num_rows_;
   uint64_t num_cols_;
 
   uint64_t** data_;
+
+  // Breadcrumbs, where from_[bitset][endloc] is the location before endloc.
+  // Thus, the cost of the subgraph not including endloc is at
+  // data_[bitset & ~(1 << endloc)][ from_[bitset][endloc] ]
+  int** from_;
 };
 
 #endif  // TABLEAU_H_
