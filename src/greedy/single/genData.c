@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define MAX 10000.0
-#define MIN 0.0
+#define MIN 0
 #define LINE_LENGTH 255
 
 void genData(int numPoints, FILE * pFile);
@@ -39,7 +39,7 @@ void genData(int numPoints, FILE * pFile) {
 	char * dataLine = calloc(sizeof(char), LINE_LENGTH);
 	srand(time(NULL));
 	for(; pointIndex < numPoints; pointIndex++) {
-		sprintf(dataLine, "%d %lf %lf\n", pointIndex, randomFloat(MIN, MAX), randomFloat(MIN, MAX));
+		sprintf(dataLine, "%d %.12lf %.12lf\n", pointIndex, randomFloat(MIN, MAX), randomFloat(MIN, MAX));
 		fputs(dataLine, pFile);
 	}
 }
