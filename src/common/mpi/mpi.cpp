@@ -2,20 +2,17 @@
 
 #include <mpi.h>
 
-#include "common/mpi/utils.h"
-
-#ifdef DEBUG
-#include <iostream>
 #include <stdint.h>
-using std::cerr;
-using std::endl;
-#endif
+
+#include "common/mpi/logging.h"
+#include "common/mpi/utils.h"
 
 Mpi::Mpi(int* argc, char*** argv, int root, MPI_Comm comm)
     : size(0)  // Will be overridden
     , rank(0)  // Will be overridden
     , root(root)
     , comm(comm)
+    , mpi(this)
     {
   MPI_CHECK(MPI_Init(argc, argv));
 
@@ -27,8 +24,21 @@ bool Mpi::isRoot() const {
   return rank == root;
 }
 
+void Mpi::barrier() {
+  MPI_CHECK(MPI_Barrier(comm));
+}
+
 void Mpi::finalize() {
   MPI_CHECK(MPI_Finalize());
+}
+
+void Mpi::bufferAttach(void* buf, int size) {
+  MPI_CHECK(MPI_Buffer_attach(buf, size));
+}
+
+void Mpi::bufferDetach(void* buf) {
+  int junk;
+  MPI_CHECK(MPI_Buffer_detach(buf, &junk));
 }
 
 void Mpi::ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Request* request) {
@@ -42,12 +52,10 @@ void Mpi::ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag)
 }
 
 void Mpi::ibsendInt(void* buf, int dest, int tag, MPI_Request* request) {
-  #ifdef DEBUG
-    cerr << "Node " << rank << ": MPI_Ibsend { payload=" << *((uint64_t*) buf)
-         << ", dest=" << dest << ", tag=" << tag << " }" << endl;
-  #endif
+  LOG("MPI_Ibsend { payload=%ld, dest=%d, tag=%d }\n", *((uint64_t*) buf),
+      dest, tag);
 
-  MPI_CHECK(MPI_Ibsend(buf, 1, MPI_INT, dest, tag, comm, request));
+  MPI_CHECK(MPI_Ibsend(buf, 1, MPI_LONG_LONG, dest, tag, comm, request));
 }
 
 void Mpi::ibsendInt(void* buf, int dest, int tag) {
@@ -65,21 +73,13 @@ void Mpi::recv(void* buf, int count, MPI_Datatype datatype, int source, int tag)
 }
 
 void Mpi::recvInt(void* buf, int source, int tag, MPI_Status* status) {
-  recv(buf, 1, MPI_INT, source, tag, status);
+  recv(buf, 1, MPI_LONG_LONG, source, tag, status);
 }
 
 void Mpi::recvInt(void* buf, int source, int tag) {
-  #ifdef DEBUG
-    cerr << "Node " << rank << ": PRE MPI_Recv { source=" << source << ", tag="
-         << tag << " }" << endl;
-  #endif
-
   recvInt(buf, source, tag, MPI_STATUS_IGNORE);
-
-  #ifdef DEBUG
-    cerr << "Node " << rank << ": POST MPI_Recv { payload="
-         << *((uint64_t*) buf) << " }" << endl;
-  #endif
+  LOG("MPI_Recv'd %ld from source=%d,tag=%d\n", *((uint64_t*) buf), source,
+      tag);
 }
 
 void Mpi::reduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op) {

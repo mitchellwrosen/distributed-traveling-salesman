@@ -9,7 +9,7 @@
 #include "distance_matrix.h"
 
 #define MAX_LOCATIONS 30  // Must be < 64
-#define UNINITIALIZED ((uint64_t) 0xFFFFFFFF)
+#define UNINITIALIZED numeric_limits<uint64_t>::max()
 
 using std::vector;
 

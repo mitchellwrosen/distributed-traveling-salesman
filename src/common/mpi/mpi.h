@@ -20,9 +20,12 @@ struct Mpi {
    */
   bool isRoot() const;
 
+  void barrier();
   void finalize();
 
-  // Wrapper methods.
+  void bufferAttach(void* buf, int size);
+  void bufferDetach(void* buf);
+
   void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Request* request);
   void ibsend(void* buf, int count, MPI_Datatype datatype, int dest, int tag);
   void ibsendInt(void* buf, int dest, int tag, MPI_Request* request);
@@ -40,6 +43,13 @@ struct Mpi {
   const int rank;
   int root;
   MPI_Comm comm;
+
+ private:
+  // 'this', so that the LOG macro works.
+  Mpi* mpi;
+
+  // Outstanding requests to be waited on.
+  //vector<MPI_Request> requests;
 };
 
 #endif  // COMMON_MPI_MPI_H_
