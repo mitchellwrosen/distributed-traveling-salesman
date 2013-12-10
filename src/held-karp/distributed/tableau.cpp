@@ -69,9 +69,8 @@ Tableau::Tableau(DistanceMatrix* dist) {
 
   // On root node, fill bottom row (can skip own column @ i=0)
   if (mpi->isRoot()) {
-    uint64_t last_row = num_rows_-1;
     for (uint64_t i = 1; i < num_cols_; ++i)
-      readData(last_row, i);
+      readData(num_rows_-1, i);
   }
 }
 
@@ -128,7 +127,6 @@ uint64_t Tableau::readData(uint64_t bitset, uint64_t loc) {
   if (cost == UNINITIALIZED) {
     mpi->recvInt(&cost, loc, bitset);
     data_[bitset][loc] = cost;
-    LOG("data_[%lu][%lu] = %lu\n", bitset, loc, cost);
   }
   return cost;
 }
@@ -137,7 +135,9 @@ void Tableau::writeData(uint64_t bitset, uint64_t loc, uint64_t cost) {
   data_[bitset][loc] = cost;
 
   for (int i = 0; i < mpi->size; ++i) {
-    if (i != mpi->rank)
+    // Send to the nodes who care, which is every node not in |bitset|. However,
+    // the root node (and only the root node) cares about the final row.
+    if (bitset == num_rows_-1 || !(bitset & (((uint64_t) 1) << i)))
       mpi->ibsendInt(&cost, i, bitset); // payload=cost, tag=bitset
   }
 }

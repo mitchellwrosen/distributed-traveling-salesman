@@ -77,7 +77,10 @@ void Mpi::recvInt(void* buf, int source, int tag, MPI_Status* status) {
 }
 
 void Mpi::recvInt(void* buf, int source, int tag) {
+  LOG("MPI_Recving from source=%d,tag=%d\n", source, tag);
+
   recvInt(buf, source, tag, MPI_STATUS_IGNORE);
+
   LOG("MPI_Recv'd %ld from source=%d,tag=%d\n", *((uint64_t*) buf), source,
       tag);
 }

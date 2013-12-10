@@ -11,6 +11,7 @@
 #include "common/location.h"
 #include "common/mpi/mpi.h"
 #include "tableau.h"
+#include "type.h"
 
 using std::cerr;
 using std::cout;
@@ -44,7 +45,7 @@ void held_karp(char* locfile, int numlocs) {
   if (mpi->isRoot()) {
     tableau.debugPrint();
 
-    uint64_t min_cost = numeric_limits<uint64_t>::max();
+    integer min_cost = numeric_limits<integer>::max();
     int last_row = tableau.numRows()-1;
     int num_cols = tableau.numCols();
     for (int i = 0; i < num_cols; ++i)
