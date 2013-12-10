@@ -34,11 +34,13 @@ int main(int argc, char** argv) {
 
 void displayResults(POINT * path) {
    printf("Order of vertices for path: ");
+   double cost = 0.0;
    while(path) {
       printf("%d ", path->index);
+      cost += path->distance;
       path = path->next;
    }
-   printf("\n");
+   printf("\nTotal Cost: %lf\n", cost);
 }
 
 float calcDistance (POINT * p1, POINT * p2) {
@@ -100,6 +102,8 @@ POINT * greedy (POINT * points) {
 
    return pathHd;
 }
+
+
 
 POINT * readData(FILE * fIndex) {
    POINT * points = NULL;
