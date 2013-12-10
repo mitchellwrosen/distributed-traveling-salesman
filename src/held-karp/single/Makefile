@@ -24,4 +24,4 @@ $(EXE): $(OBJS)
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJS)
+	@rm -f $(OBJS) $(EXE)
