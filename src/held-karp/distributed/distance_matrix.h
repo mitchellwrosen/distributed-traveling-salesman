@@ -10,26 +10,8 @@ using std::vector;
 class DistanceMatrix {
  public:
   DistanceMatrix(const vector<Location>& locs);
-
-  /**
-   * Read in a file of an upper-right distance matrix. The first integer is the
-   * number of locations. For example,
-   *
-   *    --[1]--
-   *   /   |   \
-   *  /   20    \
-   * 10    |    15
-   *  |   [4]   |
-   *  |  /   \  |
-   *  | 25   30 |
-   *  |/       \|
-   * [2]--35---[3]
-   *
-   * would be encoded as:
-   *
-   * 4 10 15 20 35 25 30
-   */
-  DistanceMatrix(const char* filename);
+  
+  static DistanceMatrix* fromLocfile(const char* locfile, int numlocs);
 
   ~DistanceMatrix();
 

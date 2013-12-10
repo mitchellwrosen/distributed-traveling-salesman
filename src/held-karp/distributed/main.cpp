@@ -11,6 +11,7 @@
 #include "common/location.h"
 #include "common/mpi/mpi.h"
 #include "tableau.h"
+#include "type.h"
 
 using std::cerr;
 using std::cout;
@@ -20,10 +21,7 @@ using std::min;
 using std::numeric_limits;
 
 void printUsage(char* progname);
-vector<Location> readLocs(char* filename, int num_locs);
-
-int** makeDistTable(const vector<Location>& locs);
-uint64_t** initializeTableau(int num_locs);
+void held_karp(char* locfile, int numlocs);
 
 Mpi* mpi;
 
@@ -33,31 +31,30 @@ int main(int argc, char** argv) {
 
   mpi = new Mpi(&argc, &argv, 0, MPI_COMM_WORLD);
 
-  int num_locs = atoi(argv[2]);
-  vector<Location> locs = readLocs(argv[1], num_locs);
+  held_karp(argv[1], atoi(argv[2]));
 
-  DistanceMatrix* dist = new DistanceMatrix(locs);
+  mpi->finalize();
+  delete mpi;
+}
+
+void held_karp(char* locfile, int numlocs) {
+  DistanceMatrix* dist = DistanceMatrix::fromLocfile(locfile, numlocs);
 
   Tableau tableau(dist);
-  //tableau.debugPrint();
 
-  uint64_t min_cost = numeric_limits<int>::max();
-  int num_rows = tableau.numRows();
-  int num_cols = tableau.numCols();
-  for (int i = 0; i < num_cols; ++i)
-    min_cost = min(min_cost, tableau.data()[num_rows-1][i] + dist->at(0, i+1));
-  cout << "Min cost path: " << min_cost << endl;
+  if (mpi->isRoot()) {
+    tableau.debugPrint();
+
+    integer min_cost = numeric_limits<integer>::max();
+    int last_row = tableau.numRows()-1;
+    int num_cols = tableau.numCols();
+    for (int i = 0; i < num_cols; ++i)
+      min_cost = min(min_cost, tableau.data()[last_row][i] + dist->at(0, i+1));
+    cout << "Min cost path: " << min_cost << endl;
+  }
 }
 
 void printUsage(char* progname) {
   cerr << "Usage: " << progname << " filename numLocations" << endl;
   exit(-1);
-}
-
-vector<Location> readLocs(char* filename, int num_locs) {
-  vector<Location> locs(num_locs);
-  ifstream infile(filename);
-  for (int i = 0; i < num_locs; ++i)
-    infile >> locs.at(i).id >> locs.at(i).x >> locs.at(i).y;
-  return locs;
 }

@@ -7,9 +7,9 @@
 
 #include "common/location.h"
 #include "distance_matrix.h"
+#include "type.h"
 
-#define MAX_LOCATIONS 30  // Must be < 64
-#define UNINITIALIZED ((uint64_t) 0xFFFFFFFF)
+#define UNINITIALIZED numeric_limits<integer>::max()
 
 using std::vector;
 
@@ -67,9 +67,9 @@ class Tableau {
   void debugPrint();
 
   // Getters
-  uint64_t numRows() const { return num_rows_; }
-  uint64_t numCols() const { return num_cols_; }
-  uint64_t** data() const { return data_; }
+  integer numRows() const { return num_rows_; }
+  integer numCols() const { return num_cols_; }
+  integer** data() const { return data_; }
 
  private:
   void initializeSendbuf(int num_locs);
@@ -79,17 +79,17 @@ class Tableau {
 
   // Read data from elsewhere in the tableau, which will possibly recv it from
   // another node.
-  uint64_t readData(uint64_t bitset, uint64_t loc);
+  integer readData(integer bitset, integer loc);
 
   // Write to the tableau, which will send it to all other nodes.
-  void writeData(uint64_t bitset, uint64_t loc, uint64_t cost);
+  void writeData(integer bitset, integer loc, integer cost);
 
-  uint64_t* sendbuf_;
+  integer* sendbuf_;
 
-  uint64_t num_rows_;
-  uint64_t num_cols_;
+  integer num_rows_;
+  integer num_cols_;
 
-  uint64_t** data_;
+  integer** data_;
 };
 
 #endif  // TABLEAU_H_

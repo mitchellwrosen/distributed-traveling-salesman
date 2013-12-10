@@ -7,8 +7,7 @@
 
 #include "common/location.h"
 #include "distance_matrix.h"
-
-#define MAX_LOCATIONS 30  // Must be < 64
+#include "type.h"
 
 using std::vector;
 
@@ -58,20 +57,20 @@ class Tableau {
   ~Tableau();
 
   void debugPrint();
-  void debugPrintPath(uint64_t row, uint64_t col);
+  void debugPrintPath(integer row, integer col);
 
   // Getters
-  uint64_t numRows() const { return num_rows_; }
-  uint64_t numCols() const { return num_cols_; }
-  uint64_t** data() const { return data_; }
+  integer numRows() const { return num_rows_; }
+  integer numCols() const { return num_cols_; }
+  integer** data() const { return data_; }
 
  private:
   void fill(DistanceMatrix* dist);
 
-  uint64_t num_rows_;
-  uint64_t num_cols_;
+  integer num_rows_;
+  integer num_cols_;
 
-  uint64_t** data_;
+  integer** data_;
 
   // Breadcrumbs, where from_[bitset][endloc] is the location before endloc.
   // Thus, the cost of the subgraph not including endloc is at

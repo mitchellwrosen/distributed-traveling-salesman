@@ -16,7 +16,7 @@
 using namespace std;
 
 void printUsage(char* progname);
-void badProblemSize(int num_routes, int num_procs);
+void badProblemSize(uint64_t num_routes, int num_procs);
 Location* readLocs(char* filename, int num_locs);
 
 Mpi* mpi;
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
   mpi = new Mpi(&argc, &argv, 0, MPI_COMM_WORLD);
 
   int num_locs = atoi(argv[2]);
-  int num_routes = numRoutes(num_locs);
+  uint64_t num_routes = numRoutes(num_locs);
 
   if (num_routes % mpi->size != 0)
     badProblemSize(num_routes, mpi->size);
@@ -84,7 +84,7 @@ void printUsage(char* progname) {
   exit(-1);
 }
 
-void badProblemSize(int num_routes, int num_procs) {
+void badProblemSize(uint64_t num_routes, int num_procs) {
   cerr << "Unable to distribute " << num_routes << " routes among " <<
       num_procs << " processors." << endl;
   mpiAbort(-1);

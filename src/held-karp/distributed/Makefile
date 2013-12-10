@@ -7,16 +7,21 @@ OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 INC=-I.
 LIBS=-lmpi
 
-all: held-karp-distributed
+EXE=held-karp-distributed
+
+all: $(EXE)
 
 debug: CC += -g -DDEBUG
-debug: held-karp-distributed
+debug: $(EXE)
 
-held-karp-distributed: $(OBJS)
-	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o held-karp-distributed
+optimized: CC += -O3
+optimized: $(EXE)
+
+$(EXE): $(OBJS)
+	$(CC) $(LDFLAGS) $(INC) $(OBJS) $(LIBS) -o $(EXE)
 
 %.o: %.cpp
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJS) held-karp-distributed
+	@rm -f $(OBJS) $(EXE)

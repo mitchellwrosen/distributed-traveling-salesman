@@ -9,6 +9,7 @@
 
 #include "common/location.h"
 #include "tableau.h"
+#include "type.h"
 
 using std::cerr;
 using std::cout;
@@ -19,9 +20,6 @@ using std::numeric_limits;
 
 void printUsage(char* progname);
 vector<Location> readLocs(char* filename, int num_locs);
-
-int** makeDistTable(const vector<Location>& locs);
-uint64_t** initializeTableau(int num_locs);
 
 int main(int argc, char** argv) {
   if (argc != 3)
@@ -35,13 +33,13 @@ int main(int argc, char** argv) {
   Tableau tableau(dist);
   tableau.debugPrint();
 
-  uint64_t min_cost = numeric_limits<int>::max();
+  integer min_cost = numeric_limits<integer>::max();
   int last_row = tableau.numRows()-1;
   int num_cols = tableau.numCols();
 
   int endloc = -1;
   for (int i = 0; i < num_cols; ++i) {
-    uint64_t cost = tableau.data()[last_row][i] + dist->at(0, i+1);
+    integer cost = tableau.data()[last_row][i] + dist->at(0, i+1);
     if (cost < min_cost) {
       min_cost = cost;
       endloc = i;

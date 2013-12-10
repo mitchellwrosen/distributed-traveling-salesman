@@ -9,6 +9,16 @@
 using std::ifstream;
 using std::vector;
 
+namespace {
+  vector<Location> readLocs(const char* filename, int num_locs) {
+    vector<Location> locs(num_locs);
+    ifstream infile(filename);
+    for (int i = 0; i < num_locs; ++i)
+      infile >> locs.at(i).id >> locs.at(i).x >> locs.at(i).y;
+    return locs;
+  }
+}
+
 DistanceMatrix::DistanceMatrix(const vector<Location>& locs) {
   num_locs_ = locs.size();
 
@@ -22,16 +32,10 @@ DistanceMatrix::DistanceMatrix(const vector<Location>& locs) {
   }
 }
 
-DistanceMatrix::DistanceMatrix(const char* filename) {
-  ifstream infile(filename);
-  infile >> num_locs_;
-
-  data_ = (int**) malloc(num_locs_ * sizeof(int*));
-  for (int row = 0; row < num_locs_-1; ++row) {
-    data_[row] = (int*) malloc(num_locs_ * sizeof(int));
-    for (int col = row+1; col < num_locs_; ++col)
-      infile >> data_[row][col];
-  }
+// static
+DistanceMatrix* DistanceMatrix::fromLocfile(const char* locfile, int numlocs) {
+  vector<Location> locs = readLocs(locfile, numlocs);
+  return new DistanceMatrix(locs);
 }
 
 DistanceMatrix::~DistanceMatrix() {

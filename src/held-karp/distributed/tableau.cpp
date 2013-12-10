@@ -13,11 +13,13 @@
 
 #include "common/location.h"
 #include "common/mpi/mpi.h"
+#include "common/mpi/logging.h"
 #include "common/mpi/utils.h"
 
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::fill_n;
 using std::min;
 using std::numeric_limits;
 using std::vector;
@@ -25,6 +27,14 @@ using std::vector;
 extern Mpi* mpi;
 
 namespace {
+  // from http://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
+  uint64_t count_bits(uint64_t n) {
+    uint64_t c; // c accumulates the total bits set in v
+    for (c = 0; n; c++)
+      n &= n - 1; // clear the least significant bit set
+    return c;
+  }
+
   void debugPrintBitset(uint64_t bitset, uint64_t num_rows) {
     cout << "{0";
     for (uint64_t row = 0; row < num_rows; ++row) {
@@ -52,47 +62,58 @@ Tableau::Tableau(DistanceMatrix* dist) {
   data_ = (uint64_t**) malloc(num_rows_ * sizeof(uint64_t*));
   for (uint64_t i = 0; i < num_rows_; ++i) {
     data_[i] = (uint64_t*) malloc(num_cols_ * sizeof(uint64_t));
-    memset(data_+i, UNINITIALIZED, num_cols_);
+    fill_n(data_[i], num_cols_, UNINITIALIZED);
   }
 
   fill(dist);
+
+  // On root node, fill bottom row (can skip own column @ i=0)
+  if (mpi->isRoot()) {
+    for (uint64_t i = 1; i < num_cols_; ++i)
+      readData(num_rows_-1, i);
+  }
 }
 
 void Tableau::initializeSendbuf(int num_locs) {
   uint64_t num_msgs = ((uint64_t) 1) << (num_locs - 2);
   uint64_t bufsize = num_msgs * (sizeof(uint64_t) + MPI_BSEND_OVERHEAD);
   sendbuf_ = (uint64_t*) malloc(bufsize);
-  MPI_Buffer_attach(sendbuf_, bufsize);
+  mpi->bufferAttach(sendbuf_, bufsize);
 }
 
 Tableau::~Tableau() {
+  // TODO: Figure out why this isn't working.
   for (uint64_t i = 0; i < num_rows_; ++i)
-    free(data_[i]);
-  free(data_);
-  free(sendbuf_);
+    ;//free(data_[i]);
+  //free(data_);
+  //free(sendbuf_);
+
+  mpi->bufferDetach(sendbuf_);
 }
 
 void Tableau::fill(DistanceMatrix* dist) {
-  fillTwoElementSets(dist);
-
   uint64_t endloc = mpi->rank;
 
-  for (uint64_t bitset = num_cols_+1; bitset < num_rows_; ++bitset) {
+  for (uint64_t bitset = 1; bitset < num_rows_; ++bitset) {
     if (!(bitset & (((uint64_t) 1) << endloc)))
       continue;
 
-    uint64_t min_path = numeric_limits<uint64_t>::max();
-    uint64_t bitset_minus_endloc = bitset & ~(((uint64_t) 1) << endloc);
+    if (count_bits(bitset) == 1) {
+      writeData(bitset, endloc, dist->at(0, endloc+1));
+    } else {
+      uint64_t min_path = numeric_limits<uint64_t>::max();
+      uint64_t bitset_minus_endloc = bitset & ~(((uint64_t) 1) << endloc);
 
-    for (uint64_t loc = 0; loc < num_cols_; ++loc) {
-      if (loc != endloc && (bitset & (((uint64_t) 1) << loc))) {
-        int loc_to_endloc = dist->at(loc+1, endloc+1);               // dist(loc,endloc)
-        uint64_t origin_to_loc = readData(bitset_minus_endloc, loc); // C(S-{endloc},loc)
-        min_path = min(min_path, origin_to_loc + loc_to_endloc);
+      for (uint64_t loc = 0; loc < num_cols_; ++loc) {
+        if (loc != endloc && (bitset & (((uint64_t) 1) << loc))) {
+          int loc_to_endloc = dist->at(loc+1, endloc+1);               // dist(loc,endloc)
+          uint64_t origin_to_loc = readData(bitset_minus_endloc, loc); // C(S-{endloc},loc)
+          min_path = min(min_path, origin_to_loc + loc_to_endloc);
+        }
       }
-    }
 
-    writeData(bitset, endloc, min_path);
+      writeData(bitset, endloc, min_path);
+    }
   }
 }
 
@@ -114,16 +135,20 @@ void Tableau::writeData(uint64_t bitset, uint64_t loc, uint64_t cost) {
   data_[bitset][loc] = cost;
 
   for (int i = 0; i < mpi->size; ++i) {
-    if (i != mpi->rank)
+    // Send to the nodes who care, which is every node not in |bitset|. However,
+    // the root node (and only the root node) cares about the final row.
+    if (bitset == num_rows_-1 || !(bitset & (((uint64_t) 1) << i)))
       mpi->ibsendInt(&cost, i, bitset); // payload=cost, tag=bitset
   }
 }
 
 void Tableau::debugPrint() {
+  #ifdef DEBUG
   for (uint64_t row = 1; row < num_rows_; ++row) {
     debugPrintBitset(row, num_rows_);
     for (uint64_t col = 0; col < num_cols_; ++col)
       cout << data_[row][col] << " ";
     cout << endl;
   }
+  #endif
 }
