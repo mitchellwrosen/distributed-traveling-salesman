@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <mpi.h>
 
 struct Point{
    int index;
@@ -14,7 +15,7 @@ struct Point{
 typedef struct Point POINT;
 
 float calcDistance (POINT * p1, POINT * p2);
-POINT * readData(FILE * fIndex);
+POINT * readData(FILE * fIndex, int skipLines, int numLines);
 void displayResults(POINT * path);
 POINT * greedy (POINT * points);
 POINT * findClosest (POINT * origin, POINT * others);
@@ -23,14 +24,27 @@ int main(int argc, char** argv) {
    FILE * pFile;
    POINT *points;
    char *fileName;
+   int numPoints;
 
-   /* Read in values */
+   /* MPI Vars */
+   int ierr, num_procs, my_id;
+
+   MPI_Init(&argc, &argv);
+
+   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
+   ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Master node will send stuff to slaves */
    fileName = argv[1];
+   numPoints = strtol(argv[2],NULL,10);
    pFile = fopen(fileName, "r");
-   points = readData(pFile);
+   points = readData(pFile, (numPoints / num_procs) * num_procs, (numPoints / num_procs));
    displayResults(greedy(points));
 
+   ierr = MPI_Finalize();
 }
+
+
 
 void displayResults(POINT * path) {
    printf("Order of vertices for path: ");
@@ -101,13 +115,15 @@ POINT * greedy (POINT * points) {
    return pathHd;
 }
 
-POINT * readData(FILE * fIndex) {
+POINT * readData(FILE * fIndex, int skipLines, int numLines) {
    POINT * points = NULL;
    int pointIndex = 0;
    double pointX = 0.0;
    double pointY = 0.0;
 
-   while(fscanf(fIndex, "%d %lf %lf", &pointIndex, &pointX, &pointY) != EOF) {
+   while(fscanf(fIndex, "%d %lf %lf", &pointIndex, &pointX, &pointY) != EOF && skipLines--);
+
+   while(fscanf(fIndex, "%d %lf %lf", &pointIndex, &pointX, &pointY) != EOF && numLines--) {
       POINT * aPoint = malloc(sizeof(POINT));
       aPoint->x = pointX;
       aPoint->y = pointY;
